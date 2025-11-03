@@ -35,6 +35,7 @@ class RoomStatus(str, PyEnum):
     occupied = 'occupied'
 
 
+
 class BookingStatus(str, PyEnum):
     pending = 'pending'
     confirmed = 'confirmed'
@@ -77,6 +78,9 @@ class UserProfile(Base):
 
     user_favourites: Mapped[List['Favourite']] = relationship('Favourite', back_populates='user',
                                                               cascade='all, delete-orphan')
+
+    refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user',
+                                                                cascade='all, delete-orphan')
 
 
 class City(Base):
@@ -235,6 +239,15 @@ class FavouriteItem(Base):
     hotel: Mapped[Hotel] = relationship('Hotel', back_populates='hotel_favourites')
 
 
+
+class RefreshToken(Base):
+    __tablename__ = 'refresh_token'
+
+    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('userprofile.id'))
+    user: Mapped[UserProfile] = relationship('UserProfile', back_populates='refresh_tokens')
+    token: Mapped[str] = mapped_column(String(512), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
 

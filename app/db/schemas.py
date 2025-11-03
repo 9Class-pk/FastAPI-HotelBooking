@@ -75,8 +75,12 @@ class HotelSchema(BaseModel):
     stars: Optional[int] = Field(None, gt=0, lt=6)
     postal_index: str
     description: str
+    street: str
+    country_id: int
+    city_id: int
+    owner_id: int
 
-    class Config:
+class Config:
         from_attributes = True
 
 
@@ -114,6 +118,9 @@ class BookingSchema(BaseModel):
     check_in: date
     check_out: date
     booking_status: BookingStatus
+    hotel_id: int
+    room_id: int
+    user_id: int
 
     class Config:
         from_attributes = True
@@ -130,6 +137,8 @@ class ReviewSchema(BaseModel):
 
 class FavouriteSchema(BaseModel):
     id: int
+    user_id: int
+
 
     class Config:
         from_attributes = True
@@ -137,6 +146,8 @@ class FavouriteSchema(BaseModel):
 
 class FavouriteItemSchema(BaseModel):
     id: int
+    favourite_id: int
+    hotel_id: int
 
     class Config:
         from_attributes = True
