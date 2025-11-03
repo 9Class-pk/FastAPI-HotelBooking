@@ -1,20 +1,22 @@
 from fastapi import HTTPException, Depends, APIRouter
 from app.db.models import UserProfile, RefreshToken
-from app.db.schemas import UserProfileSchema
+from app.db.schemas import UserProfileSchema, UserProfileLoginSchema
 from app.db.database import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from passlib.context import CryptContext
-from jose import jwt
-from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.config import (ALGORITHM, SECRET_KEY,
                               ACCESS_TOKEN_LIFETIME,
                               REFRESH_TOKEN_LIFETIME)
 from datetime import datetime, timedelta
 from app.encription import encrypt_data, decrypt_data
+import bcrypt
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 auth_router = APIRouter(prefix='/auth', tags=['Auth'])
@@ -35,12 +37,12 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data:dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=ACCESS_TOKEN_LIFETIME))
-    to_encode.update({"exp": expire})
+    to_encode.update({'exp': expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
+#refresh token
 def create_refresh_token(data: dict):
     return create_access_token(data, expires_delta=timedelta(days=REFRESH_TOKEN_LIFETIME))
 
@@ -49,7 +51,7 @@ def create_refresh_token(data: dict):
 @auth_router.post('/register', response_model=dict)
 async def register(user: UserProfileSchema, db: Session = Depends(get_db)):
     # Проверка по имени пользователя
-    if db.query(UserProfile).filter(UserProfile.user_name == user.user_name).first():
+    if db.query(UserProfile).filter(UserProfile.user_name == user.user_name).first():#вход по user_name для теста api, если сделать по email, то будет зашифрован email
         raise HTTPException(status_code=400, detail="user_name уже существует")
 
     # Шифруем email и телефон
@@ -65,6 +67,8 @@ async def register(user: UserProfileSchema, db: Session = Depends(get_db)):
 
     # Создаем пользователя с зашифрованными данными
     user_db = UserProfile(
+        first_name=user.first_name,
+        last_name=user.last_name,
         user_name=user.user_name,
         email=encrypted_email,
         age=user.age,
@@ -80,9 +84,10 @@ async def register(user: UserProfileSchema, db: Session = Depends(get_db)):
 
 
 @auth_router.post('/login')
-async def login(form_data: UserProfileSchema = Depends(),
+async def login(form_data: UserProfileLoginSchema = Depends(),
                 db: Session = Depends(get_db)):
-    user = db.query(UserProfile).filter(UserProfile.email == form_data.email).first()
+
+    user = db.query(UserProfile).filter(UserProfile.user_name == form_data.user_name).first()
 
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail='Данные логина неправильные')
