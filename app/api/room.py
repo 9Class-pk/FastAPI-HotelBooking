@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.models import Room
-from app.db.schemas import RoomSchema
+from app.db.schemas import (RoomOutSchema, RoomDetailSchema,
+                            RoomCreateSchema, RoomUpdateSchema)
 from app.db.database import SessionLocal
 
 room_router = APIRouter(prefix="/room", tags=["Room"])
@@ -16,9 +17,8 @@ async def get_db():
         db.close()
 
 
-
-@room_router.post("/", response_model=RoomSchema)
-async def create_room(room_data: RoomSchema, db: Session = Depends(get_db)):
+@room_router.post("/", response_model=RoomOutSchema)
+async def create_room(room_data: RoomCreateSchema, db: Session = Depends(get_db)):
     new_room = Room(**room_data.dict())
 
     db.add(new_room)
@@ -27,21 +27,21 @@ async def create_room(room_data: RoomSchema, db: Session = Depends(get_db)):
     return new_room
 
 
-@room_router.get("/", response_model=List[RoomSchema])
+@room_router.get("/", response_model=List[RoomOutSchema])
 async def list_room(db: Session = Depends(get_db)):
     return db.query(Room).all()
 
 
-@room_router.get("/{room_id}/", response_model=RoomSchema)
-async def get_detail(room_id: int, db: Session = Depends(get_db)):
+@room_router.get("/{room_id}/", response_model=RoomDetailSchema)
+async def detail_room(room_id: int, db: Session = Depends(get_db)):
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
     return room
 
 
-@room_router.put("/{room_id}/", response_model=RoomSchema)
-async def update_room(room_data: RoomSchema, room_id: int, db: Session = Depends(get_db)):
+@room_router.put("/{room_id}/", response_model=RoomOutSchema)
+async def update_room(room_data: RoomUpdateSchema, room_id: int, db: Session = Depends(get_db)):
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
