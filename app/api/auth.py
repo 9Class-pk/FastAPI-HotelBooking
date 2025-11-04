@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Depends, APIRouter
 from app.db.models import UserProfile, RefreshToken
-from app.db.schemas import UserProfileSchema, UserProfileLoginSchema
+from app.db.schemas import UserProfileSchema, UserProfileLoginSchema, UserProfileCreateSchema
 from app.db.database import SessionLocal
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -49,7 +49,7 @@ def create_refresh_token(data: dict):
 
 
 @auth_router.post('/register', response_model=dict)
-async def register(user: UserProfileSchema, db: Session = Depends(get_db)):
+async def register(user:UserProfileCreateSchema, db: Session = Depends(get_db)):
     # Проверка по имени пользователя
     if db.query(UserProfile).filter(UserProfile.user_name == user.user_name).first():#вход по user_name для теста api, если сделать по email, то будет зашифрован email
         raise HTTPException(status_code=400, detail="user_name уже существует")
