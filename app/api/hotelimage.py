@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.db.models import HotelImage
-from app.db.schemas import HotelImageSchema
+from app.db.schemas import (HotelImageOutSchema, HotelImageCreateSchema,
+                            HotelImageDetailSchema, HotelImageUpdateSchema)
 from app.db.database import SessionLocal
 from typing import List
 
@@ -17,8 +18,8 @@ async def get_db():
         db.close()
 
 
-@hotel_image_router.post("/", response_model=HotelImageSchema)
-async def create_hotel_image(hotel_image_data: HotelImageSchema, db: Session = Depends(get_db)):
+@hotel_image_router.post("/", response_model=HotelImageOutSchema)
+async def create_hotel_image(hotel_image_data: HotelImageCreateSchema, db: Session = Depends(get_db)):
     new_hotel_image = HotelImage(hotel_image=hotel_image_data.hotel_image, hotel_id=hotel_image_data.hotel_id)
     db.add(new_hotel_image)
     db.commit()
@@ -26,12 +27,12 @@ async def create_hotel_image(hotel_image_data: HotelImageSchema, db: Session = D
     return new_hotel_image
 
 
-@hotel_image_router.get("/", response_model=List[HotelImageSchema])
+@hotel_image_router.get("/", response_model=List[HotelImageOutSchema])
 async def list_hotel_images(db: Session = Depends(get_db)):
     return db.query(HotelImage).all()
 
 
-@hotel_image_router.get("/{hotel_image_id}/", response_model=HotelImageSchema)
+@hotel_image_router.get("/{hotel_image_id}/", response_model=HotelImageDetailSchema)
 async def detail_hotel_image(hotel_image_id: int, db: Session = Depends(get_db)):
     hotel_image_db = db.query(HotelImage).filter(HotelImage.id == hotel_image_id).first()
     if not hotel_image_db:
@@ -39,8 +40,8 @@ async def detail_hotel_image(hotel_image_id: int, db: Session = Depends(get_db))
     return hotel_image_db
 
 
-@hotel_image_router.put("/{hotel_image_id}/", response_model=HotelImageSchema)
-async def update_hotel_image(hotel_image_data: HotelImageSchema, hotel_image_id: int, db: Session = Depends(get_db)):
+@hotel_image_router.put("/{hotel_image_id}/", response_model=HotelImageOutSchema)
+async def update_hotel_image(hotel_image_data: HotelImageUpdateSchema, hotel_image_id: int, db: Session = Depends(get_db)):
     hotel_image_db = db.query(HotelImage).filter(HotelImage.id == hotel_image_id).first()
     if not hotel_image_db:
         raise HTTPException(status_code=404, detail="Hotel Image not found")
