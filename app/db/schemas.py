@@ -50,7 +50,9 @@ class UserProfileCreateSchema(BaseModel):
     first_name: str
     last_name: str
     user_name: str = Field(min_length=3, max_length=50)
-    age: Optional[int] = Field(None, ge=0, le=150)
+    role: RoleChoices
+    age: Optional[int] = Field(None, ge=16, le=90)
+    phone_number: Optional[str] = None
     email: EmailStr
     password: str = Field(min_length=8)
 
@@ -61,6 +63,47 @@ class UserProfileUpdateSchema(BaseModel):
     user_name: Optional[str] = Field(None, min_length=3, max_length=50)
     age: Optional[int] = Field(None, ge=0, le=150)
     phone_number: Optional[str] = None
+
+
+class AuthBaseSchema(BaseModel):
+    first_name: str
+    last_name: str
+    user_name: str
+    email: EmailStr
+    age: Optional[int] = None
+    phone_number: Optional[str] = None
+    role: RoleChoices
+    created_date: datetime
+
+class AuthOutSchema(AuthBaseSchema):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class AuthCreateSchema(AuthBaseSchema):
+    pass
+
+
+class AuthUpdateSchema(BaseModel):
+    first_name: Optional[str] = Field(None, min_length=2, max_length=50)
+    last_name: Optional[str] = Field(None,min_length=2, max_length=50)
+    user_name: Optional[str] = Field(None, min_length=3, max_length=50)
+    email: EmailStr
+    age: Optional[int] = Field(None, ge=0, le=150)
+    phone_number: Optional[str] = None
+    role: RoleChoices
+    created_date: datetime
+
+
+class AuthDeleteSchema(AuthBaseSchema):
+    pass
+
+
+class AuthDetailSchema(AuthBaseSchema):
+    pass
+
 
 
 class ChangePasswordSchema(BaseModel):
