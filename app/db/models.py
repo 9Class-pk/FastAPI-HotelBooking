@@ -52,6 +52,9 @@ class Country(Base):
 
     hotels: Mapped[List['Hotel']] =relationship('Hotel', back_populates='country')
 
+    def __repr__(self):
+        return self.country_name, self.country_image
+
 
 class UserProfile(Base):
     __tablename__ = 'userprofile'
@@ -82,6 +85,16 @@ class UserProfile(Base):
     refresh_tokens: Mapped[List['RefreshToken']] = relationship('RefreshToken', back_populates='user',
                                                                 cascade='all, delete-orphan')
 
+    def __repr__(self):
+        return f'{self.first_name}, {self.last_name}, {self.role}'
+
+
+class Auth(UserProfile):
+    pass
+
+    def __repr__(self):
+        return f'{self.first_name}, {self.last_name}'
+
 
 class City(Base):
     __tablename__ = 'city'
@@ -104,6 +117,9 @@ class Service(Base):
     hotels: Mapped[List['Hotel']] = relationship('Hotel',
                                                     secondary=hotel_service,
                                                     back_populates='services')
+
+    def __repr__(self):
+        return self.service_name, self.service_image
 
 
 class Hotel(Base):
@@ -143,6 +159,9 @@ class Hotel(Base):
     hotel_favourites: Mapped[List['FavouriteItem']] = relationship('FavouriteItem', back_populates='hotel',
                                                                    cascade='all, delete-orphan')
 
+    def __repr__(self):
+        return f'{self.hotel_name}'
+
 
 
 class HotelImage(Base):
@@ -153,6 +172,9 @@ class HotelImage(Base):
 
     hotel_id: Mapped[int] = mapped_column(ForeignKey('hotel.id'))
     hotel: Mapped[Hotel] = relationship('Hotel', back_populates='hotel_images')
+
+    def __repr__(self):
+        return self.hotel_image
 
 
 class Room(Base):
@@ -172,6 +194,10 @@ class Room(Base):
     room_bookings: Mapped[List['Booking']] = relationship('Booking', back_populates='room',
                                                           cascade='all, delete-orphan')
 
+    def __repr__(self):
+        return (f'{self.room_number}, {self.room_type}, {self.room_status},'
+                f' {self.room_description}', {self.price}, {self.max_guests})
+
 
 class RoomImage(Base):
     __tablename__ = 'room_image'
@@ -181,6 +207,9 @@ class RoomImage(Base):
 
     room_id: Mapped[int] = mapped_column(ForeignKey('room.id'))
     room: Mapped[Room] = relationship('Room', back_populates='room_images')
+
+    def __repr__(self):
+        return self.room_image
 
 
 class Booking(Base):
@@ -201,6 +230,9 @@ class Booking(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userprofile.id'))
     user: Mapped[UserProfile] = relationship('UserProfile', back_populates='user_bookings')
 
+    def __repr__(self):
+        return f'{self.booking_status}'
+
 
 class Review(Base):
     __tablename__  = 'review'
@@ -215,6 +247,9 @@ class Review(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('userprofile.id'))
     user: Mapped[UserProfile] = relationship('UserProfile', back_populates='user_reviews')
 
+    def __repr__(self):
+        return f'{self.stars}, {self.comment}'
+
 
 class Favourite(Base):
     __tablename__ = 'favourite'
@@ -227,6 +262,9 @@ class Favourite(Base):
     item_favourites: Mapped[List['FavouriteItem']] = relationship('FavouriteItem', back_populates='favourite',
                                                                   cascade='all, delete-orphan')
 
+    def __repr__(self):
+        return f'{self.user_id}, {self.item_favourites}'
+
 
 class FavouriteItem(Base):
     __tablename__ = 'favourite_item'
@@ -238,6 +276,9 @@ class FavouriteItem(Base):
 
     hotel_id: Mapped[int] = mapped_column(ForeignKey('hotel.id'))
     hotel: Mapped[Hotel] = relationship('Hotel', back_populates='hotel_favourites')
+
+    def __repr__(self):
+        return f'{self.hotel_id}, {self.favourite}'
 
 
 

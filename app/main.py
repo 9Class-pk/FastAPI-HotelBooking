@@ -7,8 +7,7 @@ from app.api import (user, country, city, hotel, hotelimage,
                      favourite, favouriteitem, review, room,
                      roomimage, service, bookings, health_status,
                      auth, soical_auth)
-#from app.api import
-#from app.admin.setup import setup_admin
+from app.admin.setup import setup_admin
 from starlette.middleware.sessions import SessionMiddleware
 from app.middlewares.middleware import LoggingMiddleware
 import os
@@ -45,10 +44,13 @@ booking.include_router(health_status.health_routers)
 #oauth middlewares
 booking.add_middleware(SessionMiddleware, secret_key="SECRET_KEY")
 booking.add_middleware(LoggingMiddleware)
+#admin
+setup_admin(booking)
+
 
 
 @booking.get("/", response_class=HTMLResponse)
-async def home():
+async def Home():
     return """
     <html>
         <head>

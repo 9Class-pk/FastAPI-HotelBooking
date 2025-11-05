@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from dotenv import load_dotenv
+import os
 
-DB_URL = 'postgresql://postgres:adminadmin@localhost:5432/booking'
+load_dotenv()
+DB_URL = os.getenv('DATABASE_URL')
 engine =create_engine(DB_URL)
 
 
